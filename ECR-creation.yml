@@ -1,0 +1,44 @@
+# テーマ: JupyterLabのDockerImagesをECRにプッシュし、ECSコンテナで運用する
+
+# リージョン: 東京
+
+# メインのテンプレートである"ECS-portfolio.yml"を実行前に、後のタスク定義にてImage IDを参照する必要があるため、まずは以下の下準備を行います。
+
+#------------------------------------------------------------------------
+# 1.ローカル環境にて、別途用意したDockerfileからイメージを構築する。
+
+# 2.本テンプレートを用いてECRリポジトリを作成する。
+# AWS CLI実行コマンド↓
+# aws cloudformation deploy --template-file ECR-creation.yml --stack-name portfolio --capabilities CAPABILITY_NAMED_IAM
+
+# 3.ECRコンソール画面から、1.で作成したイメージをECRにプッシュする。
+# 参照: https://docs.aws.amazon.com/ja_jp/AmazonECR/latest/userguide/docker-push-ecr-image.html
+#------------------------------------------------------------------------
+
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Portfolio ECS
+
+Resources:
+  Repository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: portfolio/app
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": 7
+                },
+                "action": {"type": "expire"
+                }
+              }
+            ]
+          }
