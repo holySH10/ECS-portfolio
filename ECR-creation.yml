@@ -1,4 +1,4 @@
-# テーマ: JupyterLabのDockerImagesをECRにプッシュし、ECSコンテナで運用する
+# DockerImageをECRにプッシュし、ECSコンテナで運用する
 
 # リージョン: 東京
 
